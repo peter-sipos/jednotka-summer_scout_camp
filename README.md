@@ -1,0 +1,32 @@
+## GENERAL INFO AND PROCEDURE
+
+- manage the registrations through Google Forms
+- generate a table with the form responses (done in the Responses tab of the Google Form)
+    - in the sheet, under Add-ons, click on Apps Script
+      - add the script
+          - in the Apps Script interface, go to Editor
+          - add a new file, choose Script
+          - copy and paste there all code from this file
+          - save the project
+      - add the trigger for automation
+          - in the Apps Script interface, go to Triggers
+          - click Add trigger
+          - pick the 'createAndSendPdfFromForm' to be run
+          - pick Head implementation
+          - pick From form as source of event
+          - pick On form submit as event type
+          - pick failure notifications as desired
+          - save the trigger
+          - **note: the email with the PDF will be sent from the email of the user that creates the trigger**
+ - prepare a document containing the body of the email
+      - **the body of document must be formatted in HTML to ensure proper text formatting in the email**
+      - i.e. only the formatting of the text done via HTML tags will be taken into account
+          - e.g. bold text outside of the <b>...</b> won't be bold in the resulting email
+      - the document itself can be stored as a regular .docx file
+      - in the template, manually fill in the field specific to your scout unit and camp. The places to fill in are marked by comments in the doc
+ - prepare an application template document that will be sent to the applicants
+      - within the template, use '{{TAG}}' where you want to substitute data from the form response
+          - **the value of the 'TAG' must be the same as the 'NAME' of the question (field) in the Google Form**         
+          - this is because the question names are also column headers in the linked table that holds the form responses
+      - in the template, manually fill in the name of your scout unit and its bank account number. The places to fill in are marked by comments in the doc
+ - for as is functionality, **EDIT ONLY** the corresponding file IDs in the BEGIN/END EDITS zone
