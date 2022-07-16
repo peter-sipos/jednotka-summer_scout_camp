@@ -39,6 +39,8 @@ const EMAIL_TEMPLATE_FILE_ID = '';
 // id of folder where final PDFs of applications will be stored
 const DESTINATION_FOLDER_ID = '';
 
+const REGEX_SPECIAL_CHARACTERS = './+()*$^?[]|';
+
 // END EDITS //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // ----------------------------------------------------------------------------------------- //
@@ -73,6 +75,22 @@ function createHeaderValuePairs(values, headers) {
     return headerValuePairs;
 }
 
+// 
+// https://stackoverflow.com/questions/10627356/how-to-use-method-replacetextsearchpattern-replacement-in-documents-service
+/**
+ * puts a backward slash ('\') in front of all regex special characters (see: REGEX_SPECIAL_CHARACTERS constant)  
+ * @param s - string to escape
+ * @returns {{match_text}} - the new, escaped string that can be safely used to match text when using `document.replaceText`
+ */
+const escapeRegexChars = (s) => 
+  [...s].reduce((acc, x) => {
+    if (REGEX_SPECIAL_CHARACTERS.includes(x)) {
+      return acc + `\\${x}`;
+    }
+
+    return acc + x;
+  }, '');
+
 // Helper function to inject data into the template
 /**
  * Replaces all the tags {{TAG}} in the document with the user inputted data
@@ -86,7 +104,7 @@ function populateTemplate(document, response_data) {
 
     // Replace tags in the template with values from the form response
     for (var key in response_data) {
-        var match_text = `{{${key}}}`;
+        var match_text = escapeRegexChars(`{{${key}}}`);
         var value = response_data[key];
 
         documentBody.replaceText(match_text, value);
