@@ -39,8 +39,6 @@ const EMAIL_TEMPLATE_FILE_ID = '';
 // id of folder where final PDFs of applications will be stored
 const DESTINATION_FOLDER_ID = '';
 
-const REGEX_SPECIAL_CHARACTERS = './+()*$^?[]|';
-
 // END EDITS //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // ----------------------------------------------------------------------------------------- //
@@ -75,10 +73,15 @@ function createHeaderValuePairs(values, headers) {
     return headerValuePairs;
 }
 
+// These characters have special meaning in regex
+const REGEX_SPECIAL_CHARACTERS = './+()*$^?[]|';
+
 // 
 // https://stackoverflow.com/questions/10627356/how-to-use-method-replacetextsearchpattern-replacement-in-documents-service
 /**
  * puts a backward slash ('\') in front of all regex special characters (see: REGEX_SPECIAL_CHARACTERS constant)  
+ * Example: 'Meno (1)' -> 'Meno \(1\)'
+ * 
  * @param s - string to escape
  * @returns {{match_text}} - the new, escaped string that can be safely used to match text when using `document.replaceText`
  */
