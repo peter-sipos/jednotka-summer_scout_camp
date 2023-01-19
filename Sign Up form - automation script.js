@@ -39,6 +39,12 @@ const EMAIL_TEMPLATE_FILE_ID = '';
 // id of folder where final PDFs of applications will be stored
 const DESTINATION_FOLDER_ID = '';
 
+// The name of your scout group as will be displayed in the the final application
+const SCOUT_GROUP_NAME = '';
+
+// The number of your scout group's banking account unto which you accept payments. Use IBAN format
+const IBAN = '';
+
 // END EDITS //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // ----------------------------------------------------------------------------------------- //
@@ -46,8 +52,13 @@ const DESTINATION_FOLDER_ID = '';
 // Get current year
 const CURRENT_YEAR = new Date().getFullYear();
 
-// The question "Year" isn't part of the application form, therefore we have to create the tag manually
+// These tags used in the application template are not questions in the application form
+// Therefore we have to create them manually
 const YEAR_TAG = "{{Rok}}";
+const PAY_BY_SQUARE_TAG = "{{payBySquare}}";
+const PARTICIPANT_BIRTH_YEAR_TAG = "{{Rok narodenia účastníka}}";
+const SCOUT_GROUP_NAME_TAG = "{{Názov zboru}}";
+const IBAN_TAG = "{{IBAN}}";
 
 /**
  * Creates header-value pairs from separate arrays of headers and values
@@ -99,8 +110,10 @@ const escapeRegexChars = (s) =>
  * Replaces all the tags {{TAG}} in the document with the user inputted data
  * @param document - the application template document
  * @param response_data - header-value pairs of the data from form
+ * @param payBySquare - personalized QR code for quick payment
+ * @param participantYear - the birth year of the participant, used for payment info in the application template
  */
-function populateTemplate(document, response_data) {
+function populateTemplate(document, response_data, payBySquare, participantYear) {
 
     // Get the document body which contains the text we'll be replacing
     var documentBody = document.getBody();
@@ -113,8 +126,17 @@ function populateTemplate(document, response_data) {
         documentBody.replaceText(match_text, value);
     }
 
-    // Manually replace the year tag (which isn't part of the response data)
-    documentBody.replaceText(YEAR_TAG, CURRENT_YEAR)
+    // Manually replace tags that aren't part of the application form
+    documentBody.replaceText(YEAR_TAG, CURRENT_YEAR);
+    documentBody.replaceText(PAY_BY_SQUARE_TAG, payBySquare);
+    documentBody.replaceText(PARTICIPANT_BIRTH_YEAR_TAG, participantYear);
+    documentBody.replaceText(SCOUT_GROUP_NAME_TAG, SCOUT_GROUP_NAME);
+    documentBody.replaceText(IBAN_TAG, IBAN);
+}
+
+function extractParticipantYearFromBirthdate(birthdate) {
+    const [day, month, year] = birthdate.split('.');
+    return year;
 }
 
 /**
@@ -152,8 +174,13 @@ function createAndSendPdfFromForm() {
     // Open the temp copy
     var openDocument = DocumentApp.openById(appTemplateTempCopy.getId());
 
+    // TODO: add creation of pbs image
+    // Get the participant's year (needed for payment info)
+    var participantYear = extractParticipantYearFromBirthdate(`${responseData["Dátum narodenia"]}`);
+
+
     // Populate the template with form responses and save it
-    populateTemplate(openDocument, responseData);
+    populateTemplate(openDocument, responseData, payBySquare, participantYear);
     openDocument.saveAndClose();
 
     // Convert the populated template to PDF
