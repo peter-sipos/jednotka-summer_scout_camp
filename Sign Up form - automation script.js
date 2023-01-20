@@ -139,6 +139,18 @@ function extractParticipantYearFromBirthdate(birthdate) {
     return year;
 }
 
+function generateQrPayment(participantFee, participantName, participantSurname, participantYear) {
+    const qrgeneratorskUrl = 'https://api.QRGenerator.sk/by-square/pay/qr.png'
+    const queryParams = `?iban=${IBAN}` +
+        `&amount=${participantFee}` +
+        `&currency=EUR` +
+        `&payment_note=Tabor ${CURRENT_YEAR}, ${participantName} ${participantSurname}, ${participantYear}` +
+        `&size=128` +
+        `&transparent=false`;
+
+    return URLFetchApp.fetch(qrgeneratorskUrl + encodeURIComponent(queryParams)).getBlob();
+}
+
 /**
  * The main function that creates and sends the application PDF
  * THIS FUNCTION MUST BE SELECTED IN THE TRIGGER
@@ -174,10 +186,14 @@ function createAndSendPdfFromForm() {
     // Open the temp copy
     var openDocument = DocumentApp.openById(appTemplateTempCopy.getId());
 
-    // TODO: add creation of pbs image
-    // Get the participant's year (needed for payment info)
+    // Get the participant's year, fee, name and surname (needed for payment info)
     var participantYear = extractParticipantYearFromBirthdate(`${responseData["Dátum narodenia"]}`);
+    var participantFee = `${responseData["Účastnícky poplatok"]}`;
+    var participantName = `${responseData["Meno"]}`;
+    var participantSurname = `${responseData["Priezvisko"]}`;
 
+    // Generate the PayBySquare QR code for the participant
+    var payBySquare = generateQrPayment(participantFee, participantName, participantSurname, participantYear);
 
     // Populate the template with form responses and save it
     populateTemplate(openDocument, responseData, payBySquare, participantYear);
@@ -186,8 +202,8 @@ function createAndSendPdfFromForm() {
     // Convert the populated template to PDF
     var documentCopyPdf = appTemplateTempCopy.getAs(MimeType.PDF);
 
-    // Use the values of the specific headers in the file name
-    var filename = `Prihláška na skautský tábor ` + CURRENT_YEAR + ` - ${responseData["Meno"]} ${responseData["Priezvisko"]}`;
+    // Uniquely name the PDF after the participant
+    var filename = `Prihláška na skautský tábor ` + CURRENT_YEAR + ` - ` + participantName + ` ` + participantSurname;
 
     // Save the PDF to target folder
     var resultPdfFile = targetFolder.createFile(documentCopyPdf).setName(filename);
