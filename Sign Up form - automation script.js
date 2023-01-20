@@ -45,6 +45,9 @@ const SCOUT_GROUP_NAME = '';
 // The number of your scout group's banking account unto which you accept payments. Use IBAN format
 const IBAN = '';
 
+// The width of the pay by square qr code. For provided template leave as is.
+const PBS_QR_WIDTH = 128;
+
 // END EDITS //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // ----------------------------------------------------------------------------------------- //
@@ -105,7 +108,30 @@ const escapeRegexChars = (s) =>
     return acc + x;
   }, '');
 
-// Helper function to inject data into the template
+/**
+ * Helper function that replaces given text with given image.
+ * Warning - the text to be replaced needs to be in a paragraph, not in a (bullet)list item.
+ * The whole paragraph containing the text is replaced. Therefore it is advised to have the searched text on a separate paragraph.
+ * Based on: https://gist.github.com/tanaikech/f84831455dea5c394e48caaee0058b26
+ * @param body - the body of the opened document
+ * @param searchText - the text to be replaced by image
+ * @param image - the image to replace the text with
+ * @param width - desired width of the image for resizing
+ */
+function replaceTextToImage(body, searchText, image, width) {
+    var next = body.findText(searchText);
+    if (!next) return;
+    var r = next.getElement();
+    r.asText().setText("");
+    var img = r.getParent().asParagraph().insertInlineImage(0, image);
+    if (width && typeof width == "number") {
+        var w = img.getWidth();
+        var h = img.getHeight();
+        img.setWidth(width);
+        img.setHeight(width * h / w);
+    }
+}
+
 /**
  * Replaces all the tags {{TAG}} in the document with the user inputted data
  * @param document - the application template document
@@ -128,10 +154,10 @@ function populateTemplate(document, response_data, payBySquare, participantYear)
 
     // Manually replace tags that aren't part of the application form
     documentBody.replaceText(YEAR_TAG, CURRENT_YEAR);
-    documentBody.replaceText(PAY_BY_SQUARE_TAG, payBySquare);
     documentBody.replaceText(PARTICIPANT_BIRTH_YEAR_TAG, participantYear);
     documentBody.replaceText(SCOUT_GROUP_NAME_TAG, SCOUT_GROUP_NAME);
     documentBody.replaceText(IBAN_TAG, IBAN);
+    replaceTextToImage(documentBody, PAY_BY_SQUARE_TAG, payBySquare, PBS_QR_WIDTH);
 }
 
 function extractParticipantYearFromBirthdate(birthdate) {
@@ -148,7 +174,7 @@ function generateQrPayment(participantFee, participantName, participantSurname, 
         `&size=128` +
         `&transparent=false`;
 
-    return URLFetchApp.fetch(qrgeneratorskUrl + encodeURIComponent(queryParams)).getBlob();
+    return UrlFetchApp.fetch(qrgeneratorskUrl + queryParams, {muteHttpExceptions: true}).getBlob();
 }
 
 function isFileDocx(file){
@@ -159,9 +185,11 @@ function isFileDocx(file){
 /**
  * Function for converting .docx file to Google Doc file.
  * Google Apps Script can't generally work with Microsoft .docx file so it needs to be converted.
- * Based on: https://gist.github.com/tanaikech/8d639542577a594f6104b7f6fb753064
+ * Requires for Drive API v2 to be enabled in the Google Apps Script editor
+ * Based on: https://stackoverflow.com/a/59535930
+ * @param docxFile - the .docx file that is to be converted into Google Doc file
  */
-function convToGoogle(docxFile) {
+function convToGoogleDoc(docxFile) {
     var newDoc = Drive.newFile();
     var docxFileBlob = docxFile.getBlob();
     var gdocFile = Drive.Files.insert(newDoc, docxFileBlob, {convert:true});
@@ -201,7 +229,7 @@ function createAndSendPdfFromForm() {
     // by the script. The converted copy will get deleted at the end.
     var isOriginalAppTemplateFileDocx = isFileDocx(applicationTemplateFile)
     if (isOriginalAppTemplateFileDocx){
-        applicationTemplateFile = convToGoogle(applicationTemplateFile);
+        applicationTemplateFile = convToGoogleDoc(applicationTemplateFile);
     }
 
     // Create a temp copy of the application template file
@@ -241,7 +269,7 @@ function createAndSendPdfFromForm() {
     // Check if email template is .docx and if so, convert it similarly to application template
     var isOriginalEmailTemplateFileDocx = isFileDocx(emailTemplateFile);
     if (isOriginalEmailTemplateFileDocx){
-        emailTemplateFile = convToGoogle(emailTemplateFile)
+        emailTemplateFile = convToGoogleDoc(emailTemplateFile)
     }
 
     // Load the email body from the email template document and close it
@@ -251,8 +279,8 @@ function createAndSendPdfFromForm() {
     openDocument.saveAndClose();
 
     // Delete the converted copy of the email template if the original was docx
-    if (isOriginalAppTemplateFileDocx){
-        applicationTemplateFile.setTrashed(true);
+    if (isOriginalEmailTemplateFileDocx){
+        emailTemplateFile.setTrashed(true);
     }
 
     // Send the email with PDF attached
