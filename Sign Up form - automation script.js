@@ -151,6 +151,49 @@ function generateQrPayment(participantFee, participantName, participantSurname, 
     return URLFetchApp.fetch(qrgeneratorskUrl + encodeURIComponent(queryParams)).getBlob();
 }
 
+function isFileDocx(file){
+    const docxMime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    return file.getMimeType() === docxMime;
+}
+
+/**
+ * Function for converting .docx file to Google Doc file.
+ * Google Apps Script can't generally work with Microsoft .docx file so it needs to be converted.
+ * Based on: https://gist.github.com/tanaikech/8d639542577a594f6104b7f6fb753064
+ */
+function convToGoogle(fileId) {
+    if (fileId == null) throw new Error("No file ID.");
+    var file = DriveApp.getFileById(fileId);
+    var filename = file.getName();
+    var mime = file.getMimeType();
+    var ToMime = "application/vnd.google-apps.document";
+    var metadata = {
+        name: filename,
+        mimeType: ToMime
+    };
+    var fields = "id,mimeType,name";
+    var url = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=" + encodeURIComponent(fields);
+    var boundary = "xxxxxxxxxx";
+    var data = "--" + boundary + "\r\n";
+    data += "Content-Disposition: form-data; name=\"metadata\";\r\n";
+    data += "Content-Type: application/json; charset=UTF-8\r\n\r\n";
+    data += JSON.stringify(metadata) + "\r\n";
+    data += "--" + boundary + "\r\n";
+    data += "Content-Disposition: form-data; name=\"file\"; filename=\"" + filename + "\"\r\n";
+    data += "Content-Type: " + mime + "\r\n\r\n";
+    var payload = Utilities.newBlob(data).getBytes().concat(file.getBlob().getBytes()).concat(Utilities.newBlob("\r\n--" + boundary + "\r\n").getBytes());
+    var res = UrlFetchApp.fetch(url, {
+        method: "post",
+        headers: {
+            "Authorization": "Bearer " + ScriptApp.getOAuthToken(),
+            "Content-Type": "multipart/related; boundary=" + boundary
+        },
+        payload: payload,
+        muteHttpExceptions: true
+    }).getContentText();
+    return JSON.parse(res).id;
+}
+
 /**
  * The main function that creates and sends the application PDF
  * THIS FUNCTION MUST BE SELECTED IN THE TRIGGER
@@ -180,6 +223,13 @@ function createAndSendPdfFromForm() {
     var emailTemplateFile = DriveApp.getFileById(EMAIL_TEMPLATE_FILE_ID);
     var targetFolder = DriveApp.getFolderById(DESTINATION_FOLDER_ID);
 
+    // Check if the original application template file is DOCX. If yes, convert it to Google Doc so it can be worked on
+    // by the script. The converted copy will get deleted at the end.
+    var isOriginalAppTemplateFileDocx = isFileDocx(applicationTemplateFile)
+    if (isOriginalAppTemplateFileDocx){
+        applicationTemplateFile = DriveApp.getFileById(convToGoogle(APPLICATION_TEMPLATE_FILE_ID));
+    }
+
     // Create a temp copy of the application template file
     var appTemplateTempCopy = applicationTemplateFile.makeCopy(targetFolder);
 
@@ -208,9 +258,11 @@ function createAndSendPdfFromForm() {
     // Save the PDF to target folder
     var resultPdfFile = targetFolder.createFile(documentCopyPdf).setName(filename);
 
-    // Delete the temp copy of the template
+    // Delete the temp copy of the template and also the converted copy if the original was docx
     appTemplateTempCopy.setTrashed(true);
-
+    if (isOriginalAppTemplateFileDocx){
+        applicationTemplateFile.setTrashed(true);
+    }
 
     // Load the email body from the email template document and close it
     // The email template file must contain HTML tags for proper formatting, as the email body text is sent as HTML
