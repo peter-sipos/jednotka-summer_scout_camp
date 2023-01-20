@@ -161,37 +161,11 @@ function isFileDocx(file){
  * Google Apps Script can't generally work with Microsoft .docx file so it needs to be converted.
  * Based on: https://gist.github.com/tanaikech/8d639542577a594f6104b7f6fb753064
  */
-function convToGoogle(fileId) {
-    if (fileId == null) throw new Error("No file ID.");
-    var file = DriveApp.getFileById(fileId);
-    var filename = file.getName();
-    var mime = file.getMimeType();
-    var ToMime = "application/vnd.google-apps.document";
-    var metadata = {
-        name: filename,
-        mimeType: ToMime
-    };
-    var fields = "id,mimeType,name";
-    var url = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=" + encodeURIComponent(fields);
-    var boundary = "xxxxxxxxxx";
-    var data = "--" + boundary + "\r\n";
-    data += "Content-Disposition: form-data; name=\"metadata\";\r\n";
-    data += "Content-Type: application/json; charset=UTF-8\r\n\r\n";
-    data += JSON.stringify(metadata) + "\r\n";
-    data += "--" + boundary + "\r\n";
-    data += "Content-Disposition: form-data; name=\"file\"; filename=\"" + filename + "\"\r\n";
-    data += "Content-Type: " + mime + "\r\n\r\n";
-    var payload = Utilities.newBlob(data).getBytes().concat(file.getBlob().getBytes()).concat(Utilities.newBlob("\r\n--" + boundary + "\r\n").getBytes());
-    var res = UrlFetchApp.fetch(url, {
-        method: "post",
-        headers: {
-            "Authorization": "Bearer " + ScriptApp.getOAuthToken(),
-            "Content-Type": "multipart/related; boundary=" + boundary
-        },
-        payload: payload,
-        muteHttpExceptions: true
-    }).getContentText();
-    return JSON.parse(res).id;
+function convToGoogle(docxFile) {
+    var newDoc = Drive.newFile();
+    var docxFileBlob = docxFile.getBlob();
+    var gdocFile = Drive.Files.insert(newDoc, docxFileBlob, {convert:true});
+    return DriveApp.getFileById(gdocFile.id);
 }
 
 /**
@@ -227,7 +201,7 @@ function createAndSendPdfFromForm() {
     // by the script. The converted copy will get deleted at the end.
     var isOriginalAppTemplateFileDocx = isFileDocx(applicationTemplateFile)
     if (isOriginalAppTemplateFileDocx){
-        applicationTemplateFile = DriveApp.getFileById(convToGoogle(APPLICATION_TEMPLATE_FILE_ID));
+        applicationTemplateFile = convToGoogle(applicationTemplateFile);
     }
 
     // Create a temp copy of the application template file
@@ -264,11 +238,22 @@ function createAndSendPdfFromForm() {
         applicationTemplateFile.setTrashed(true);
     }
 
+    // Check if email template is .docx and if so, convert it similarly to application template
+    var isOriginalEmailTemplateFileDocx = isFileDocx(emailTemplateFile);
+    if (isOriginalEmailTemplateFileDocx){
+        emailTemplateFile = convToGoogle(emailTemplateFile)
+    }
+
     // Load the email body from the email template document and close it
     // The email template file must contain HTML tags for proper formatting, as the email body text is sent as HTML
     openDocument = DocumentApp.openById(emailTemplateFile.getId());
     var emailBody = openDocument.getBody().getText();
     openDocument.saveAndClose();
+
+    // Delete the converted copy of the email template if the original was docx
+    if (isOriginalAppTemplateFileDocx){
+        applicationTemplateFile.setTrashed(true);
+    }
 
     // Send the email with PDF attached
     // Sender email is the one which has set up the trigger
