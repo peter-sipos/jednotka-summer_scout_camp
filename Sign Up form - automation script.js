@@ -288,6 +288,9 @@ function createAndSendPdfFromForm() {
     // Sender email is the one which has set up the trigger
     // Use the specific "E-mail" header to get the recipient's address
     sendEmail(`${responseData[EMAIL_FIELD]}`, emailBody, resultPdfFile);
+
+    // Add the URL link to the final PDF into the spreadsheet
+    addPdfLinkToSheet(sheet, lastRowIndex, headers, resultPdfFile);
 }
 
 
@@ -314,4 +317,28 @@ function sendEmail(recipient, emailBody, pdfFile){
         name: SCOUT_GROUP_NAME,
         htmlBody: emailBody
     });
+}
+
+/**
+ * Adds a link to the generated PDF file stored on drive to the sheet with form responses.
+ * This way, it's easier to find participant's application in case it gets lost.
+ * @param sheet - the sheet containing the form responses
+ * @param lastRowIndex - the index of the last row in the sheet, 0-indexed
+ * @param headers - the array containg the headers (values of the first row) of the sheet
+ * @param pdf - the finalized PDF of the application
+ */
+function addPdfLinkToSheet(sheet, lastRowIndex, headers, pdf){
+    // Get the index of the last column
+    var lastColumnIndex = headers.length - 1;
+
+    // Check if the last column contains PDF links, if not, designate the column for it
+    if (headers [lastColumnIndex] !== PDF_URL_HEADER){
+        // Important - first increment the index -> otherwise you will overwrite the originally last column
+        lastColumnIndex++;
+        // The cell ranges are 1-indexed, therefore the necessary +1  to the index
+        sheet.getRange(1, lastColumnIndex + 1).setValue(PDF_URL_HEADER);
+    }
+
+    // Insert the link to the PDF into last column of the last row (where current response data is stored)
+    sheet.getRange(lastRowIndex+1, lastColumnIndex +1).setValue(pdf.getUrl());
 }

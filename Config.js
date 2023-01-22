@@ -117,3 +117,5 @@ const CURRENT_YEAR = new Date().getFullYear();
 
 // Special characters that can mess up tag replacement so they need to be escaped
 const SPECIAL_CHARACTERS_TO_ESCAPE = './+()*$^?[]|';
+
+const PDF_URL_HEADER = 'PDF link';
