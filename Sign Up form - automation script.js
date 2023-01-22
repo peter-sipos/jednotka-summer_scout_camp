@@ -113,6 +113,12 @@ function populateTemplate(document, response_data, payBySquare, participantYear)
     documentBody.replaceText(SCOUT_GROUP_NAME_TAG, SCOUT_GROUP_NAME);
     documentBody.replaceText(IBAN_TAG, IBAN);
     replaceTextToImage(documentBody, PAY_BY_SQUARE_TAG, payBySquare, PBS_QR_WIDTH);
+    documentBody.replaceText(CAMP_MUNICIPALITY_TAG, CAMP_MUNICIPALITY);
+    documentBody.replaceText(CAMP_COORDINATES_TAG, CAMP_COORDINATES);
+    documentBody.replaceText(CAMP_WEBSITE_TAG, CAMP_WEBSITE);
+    documentBody.replaceText(CAMP_LEADER_NAME_TAG, CAMP_LEADER_NAME);
+    documentBody.replaceText(CAMP_LEADER_EMAIL_TAG, CAMP_LEADER_EMAIL);
+    documentBody.replaceText(CAMP_LEADER_PHONE_TAG, CAMP_LEADER_PHONE);
 }
 
 
@@ -260,13 +266,20 @@ function createAndSendPdfFromForm() {
         emailTemplateFile = convToGoogleDoc(emailTemplateFile)
     }
 
+    // Create a temp copy of the email template file
+    var emailTemplateTempCopy = emailTemplateFile.makeCopy(targetFolder);
+
+    // Open and populate the email template file
+    openDocument = DocumentApp.openById(emailTemplateTempCopy.getId());
+    populateTemplate(openDocument, responseData, payBySquare, participantYear);
+
     // Load the email body from the email template document and close it
     // The email template file must contain HTML tags for proper formatting, as the email body text is sent as HTML
-    openDocument = DocumentApp.openById(emailTemplateFile.getId());
     var emailBody = openDocument.getBody().getText();
     openDocument.saveAndClose();
 
-    // Delete the converted copy of the email template if the original was docx
+    // Delete the temp copy of the email template and also the converted copy of the email template if the original was docx
+    emailTemplateTempCopy.setTrashed(true);
     if (isOriginalEmailTemplateFileDocx){
         emailTemplateFile.setTrashed(true);
     }
