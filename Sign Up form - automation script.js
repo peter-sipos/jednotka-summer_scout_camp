@@ -1,6 +1,6 @@
 /**
  * @author Peter Šípoš
- * @version 1.0
+ * @version 1.1
  *
  * Purpose:
  * to parse the data from online application form for a scout summer camp into a document template that will be
@@ -16,52 +16,6 @@
  * - automatic current year fill in into the email template
  */
 
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////
-// BEGIN EDITS ////////////////////////////////////////////////////////////////////////////////
-
-
-// FILE ID = string between /d/ and /edit in URL
-// EXAMPLE FILE URL: https://docs.google.com/document/d/1wdewdkfeef28nd83s2/edit
-// FILE ID = 1wdewdkfeef28nd83s2
-
-// FOLDER ID = string after last / in URL
-// EXAMPLE FOLDER URL https://drive.google.com/drive/u/1/folders/37dh8nxnxnd8ghag8ax
-// FOLDER ID = 37dh8nxnxnd8ghag8ax
-
-// id of application template document
-const APPLICATION_TEMPLATE_FILE_ID = '';
-
-// id of email body template document
-const EMAIL_TEMPLATE_FILE_ID = '';
-
-// id of folder where final PDFs of applications will be stored
-const DESTINATION_FOLDER_ID = '';
-
-// The name of your scout group as will be displayed in the the final application
-const SCOUT_GROUP_NAME = '';
-
-// The number of your scout group's banking account unto which you accept payments. Use IBAN format
-const IBAN = '';
-
-// The width of the pay by square qr code. For provided template leave as is.
-const PBS_QR_WIDTH = 128;
-
-// END EDITS //////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
-// ----------------------------------------------------------------------------------------- //
-
-// Get current year
-const CURRENT_YEAR = new Date().getFullYear();
-
-// These tags used in the application template are not questions in the application form
-// Therefore we have to create them manually
-const YEAR_TAG = "{{Rok}}";
-const PAY_BY_SQUARE_TAG = "{{payBySquare}}";
-const PARTICIPANT_BIRTH_YEAR_TAG = "{{Rok narodenia účastníka}}";
-const SCOUT_GROUP_NAME_TAG = "{{Názov zboru}}";
-const IBAN_TAG = "{{IBAN}}";
 
 /**
  * Creates header-value pairs from separate arrays of headers and values
@@ -87,31 +41,31 @@ function createHeaderValuePairs(values, headers) {
     return headerValuePairs;
 }
 
-// These characters have special meaning in regex
-const REGEX_SPECIAL_CHARACTERS = './+()*$^?[]|';
 
-// 
-// https://stackoverflow.com/questions/10627356/how-to-use-method-replacetextsearchpattern-replacement-in-documents-service
 /**
- * puts a backward slash ('\') in front of all regex special characters (see: REGEX_SPECIAL_CHARACTERS constant)  
+ * Helper function that escapes special characters in texts that replaces the tags in the template
+ * Puts a backward slash ('\') in front of all special characters (see: SPECIAL_CHARACTERS_TO_ESCAPE constant) to escape them
  * Example: 'Meno (1)' -> 'Meno \(1\)'
- * 
+ * Based on: https://stackoverflow.com/questions/10627356/how-to-use-method-replacetextsearchpattern-replacement-in-documents-service
  * @param s - string to escape
  * @returns {{match_text}} - the new, escaped string that can be safely used to match text when using `document.replaceText`
  */
 const escapeRegexChars = (s) => 
   [...s].reduce((acc, x) => {
-    if (REGEX_SPECIAL_CHARACTERS.includes(x)) {
+    if (SPECIAL_CHARACTERS_TO_ESCAPE.includes(x)) {
       return acc + `\\${x}`;
     }
 
     return acc + x;
   }, '');
 
+
 /**
  * Helper function that replaces given text with given image.
  * Warning - the text to be replaced needs to be in a paragraph, not in a (bullet)list item.
- * The whole paragraph containing the text is replaced. Therefore it is advised to have the searched text on a separate paragraph.
+ * The whole paragraph containing the text is replaced. Therefore it is advised to have the searched text
+ * on a separate paragraph. If you need to have the image inserted inline with existing text, put the image tag
+ * and the text you want to keep into a table into different cells in the template.
  * Based on: https://gist.github.com/tanaikech/f84831455dea5c394e48caaee0058b26
  * @param body - the body of the opened document
  * @param searchText - the text to be replaced by image
@@ -131,6 +85,7 @@ function replaceTextToImage(body, searchText, image, width) {
         img.setHeight(width * h / w);
     }
 }
+
 
 /**
  * Replaces all the tags {{TAG}} in the document with the user inputted data
@@ -160,11 +115,36 @@ function populateTemplate(document, response_data, payBySquare, participantYear)
     replaceTextToImage(documentBody, PAY_BY_SQUARE_TAG, payBySquare, PBS_QR_WIDTH);
 }
 
-function extractParticipantYearFromBirthdate(birthdate) {
-    const [day, month, year] = birthdate.split('.');
+
+/**
+ * Extracts year from a date in "dd.mm.yyyy" format.
+ * @param date - the date in dd.mm.yyyy format
+ * @returns {string} - the extracted year
+ */
+function extractYearFromDate(date) {
+    const [day, month, year] = date.split('.');
     return year;
 }
 
+
+/**
+ * Generates a Pay By Square QR code .png file for easy payment by making a call to external API
+ * Currently uses API available at https://www.qrgenerator.sk/
+ * If in the future the API becomes unavailable, there are two alternatives:
+ *   1) Make use of the official by square generator API - after registration you get 100 generations for free per month
+ *      Official by square resource: https://app.bysquare.com/App/api
+ *   2) Make calls to their freely available online generator at https://bsqr.co/generator/
+ *      The called URL is: https://bsqr.co/generator/qr.php
+ *      It expects a POST call with XML payload with ContentType: application/x-www-form-urlencoded
+ *      It returns an XML in which there is the generated QR code in a Base64 string
+ *      The string needs to be corrected - it contains additional '\' characters which are invalid Base64 characters
+ *      Then the string needs to be converted to a .png file
+ * @param participantFee - payment amount
+ * @param participantName - name of the participant - used in payment_note for assigning payment to participant
+ * @param participantSurname - surname of the participant - used in payment_note for assigning payment to participant
+ * @param participantYear - year of birth of the participant - used in payment_note for assigning payment to participant
+ * @returns {Blob} - the
+ */
 function generateQrPayment(participantFee, participantName, participantSurname, participantYear) {
     const qrgeneratorskUrl = 'https://api.QRGenerator.sk/by-square/pay/qr.png'
     const queryParams = `?iban=${IBAN}` +
@@ -177,10 +157,17 @@ function generateQrPayment(participantFee, participantName, participantSurname, 
     return UrlFetchApp.fetch(qrgeneratorskUrl + queryParams, {muteHttpExceptions: true}).getBlob();
 }
 
+
+/**
+ * Helper function to check if a given document is an MS Word .docx file
+ * @param file - the checked document file
+ * @returns {boolean} - true if the document is .docx file, false otherwise
+ */
 function isFileDocx(file){
     const docxMime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
     return file.getMimeType() === docxMime;
 }
+
 
 /**
  * Function for converting .docx file to Google Doc file.
@@ -195,6 +182,7 @@ function convToGoogleDoc(docxFile) {
     var gdocFile = Drive.Files.insert(newDoc, docxFileBlob, {convert:true});
     return DriveApp.getFileById(gdocFile.id);
 }
+
 
 /**
  * The main function that creates and sends the application PDF
@@ -239,10 +227,10 @@ function createAndSendPdfFromForm() {
     var openDocument = DocumentApp.openById(appTemplateTempCopy.getId());
 
     // Get the participant's year, fee, name and surname (needed for payment info)
-    var participantYear = extractParticipantYearFromBirthdate(`${responseData["Dátum narodenia"]}`);
-    var participantFee = `${responseData["Účastnícky poplatok"]}`;
-    var participantName = `${responseData["Meno"]}`;
-    var participantSurname = `${responseData["Priezvisko"]}`;
+    var participantYear = extractYearFromDate(`${responseData[PARTICIPANT_BIRTHDAY_FIELD]}`);
+    var participantFee = `${responseData[PARTICIPANT_FEE_FIELD]}`;
+    var participantName = `${responseData[PARTICIPANT_NAME_FIELD]}`;
+    var participantSurname = `${responseData[PARTICIPANT_SURNAME_FIELD]}`;
 
     // Generate the PayBySquare QR code for the participant
     var payBySquare = generateQrPayment(participantFee, participantName, participantSurname, participantYear);
@@ -286,8 +274,9 @@ function createAndSendPdfFromForm() {
     // Send the email with PDF attached
     // Sender email is the one which has set up the trigger
     // Use the specific "E-mail" header to get the recipient's address
-    sendEmail(`${responseData["E-mail"]}`, emailBody, resultPdfFile);
+    sendEmail(`${responseData[EMAIL_FIELD]}`, emailBody, resultPdfFile);
 }
+
 
 /**
  * Sends email with attachment to the recipient
@@ -296,18 +285,20 @@ function createAndSendPdfFromForm() {
  * @param pdfFile - attached application in PDF
  */
 function sendEmail(recipient, emailBody, pdfFile){
+    var subject = "Prihláška na skautský tábor " + CURRENT_YEAR;
+
     /**
      * Google Apps-Script native function for sending emails
      * @param recipient - email address of the recipient
-     * @param - email subject
-     * @param - empty email body (is replaced with the htmlBody)
-     * @param attachments - array od attachments
-     * @param name - sender name
+     * @param subject - the subject of the email
+     * @param third parameter - empty email body (is replaced with the htmlBody)
+     * @param attachments - array od attachments - currently only the application in PDF
+     * @param name - displayed sender name
      * @param htmlBody - email body in HTML format
      */
-    GmailApp.sendEmail(recipient, "Prihláška na skautský tábor " + CURRENT_YEAR , '', {
+    GmailApp.sendEmail(recipient, subject, '', {
         attachments: [pdfFile],
-        name: '1.zbor Baden-Powella',
+        name: SCOUT_GROUP_NAME,
         htmlBody: emailBody
     });
 }
