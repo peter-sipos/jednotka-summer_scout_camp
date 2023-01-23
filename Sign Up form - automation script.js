@@ -179,15 +179,48 @@ function isFileDocx(file){
  * Function for converting .docx file to Google Doc file.
  * Google Apps Script can't generally work with Microsoft .docx file so it needs to be converted.
  * Requires for Drive API v2 to be enabled in the Google Apps Script editor
- * Based on: https://stackoverflow.com/a/59535930
- * @param docxFile - the .docx file that is to be converted into Google Doc file
+ * Based on: https://gist.github.com/tanaikech/8d639542577a594f6104b7f6fb753064
+ * @param file - the .docx file that is to be converted into Google Doc file
  */
-function convToGoogleDoc(docxFile) {
-    var newDoc = Drive.newFile();
-    var docxFileBlob = docxFile.getBlob();
-    var gdocFile = Drive.Files.insert(newDoc, docxFileBlob, {convert:true});
-    return DriveApp.getFileById(gdocFile.id);
+function convToGoogleDoc(file){
+    var filename = file.getName();
+    var mime = file.getMimeType();
+    var toMime = "application/vnd.google-apps.document";
+    var metadata = {
+        name: filename,
+        mimeType: toMime
+    };
+    var fields = "id,mimeType,name";
+    var url = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=" + encodeURIComponent(fields);
+    var boundary = "xxxxxxxxxx";
+    var data = "--" + boundary + "\r\n";
+    data += "Content-Type: application/json; charset=UTF-8\r\n\r\n";
+    data += JSON.stringify(metadata) + "\r\n";
+    data += "--" + boundary + "\r\n";
+    data += "Content-Type: " + mime + "\r\n\r\n";
+    var payload = Utilities.newBlob(data).getBytes().concat(file.getBlob().getBytes()).concat(Utilities.newBlob("\r\n--" + boundary + "--").getBytes());
+    var res = UrlFetchApp.fetch(url, {
+        method: "post",
+        headers: {
+            "Authorization": "Bearer " + ScriptApp.getOAuthToken(),
+            "Content-Type": "multipart/related; boundary=" + boundary
+        },
+        payload: payload,
+        muteHttpExceptions: true
+    }).getContentText();
+    return DriveApp.getFileById(JSON.parse(res).id);
 }
+
+// Original function for converting .docx to Google doc.
+// Replaced by a better solution that doesn't require manual enablement of Drive API.
+// Can be uncommented and used as is in case the other solution stops working.
+// This solution is based on: https://stackoverflow.com/a/59535930
+// function convToGoogleDoc(docxFile) {
+//     var newDoc = Drive.newFile();
+//     var docxFileBlob = docxFile.getBlob();
+//     var gdocFile = Drive.Files.insert(newDoc, docxFileBlob, {convert:true});
+//     return DriveApp.getFileById(gdocFile.id);
+// }
 
 
 /**
