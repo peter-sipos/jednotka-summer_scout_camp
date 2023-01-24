@@ -2,120 +2,121 @@
  * @author Peter Šípoš
  * @version 1.1
  *
- * Purpose:
- * Configuration file for the accompanying script for application automation.
- * To customize the script for your use, edit only values in this config file - no need to edit the main script file.
+ * Ciel:
+ * Konfiguracny subor pre prilozeny skript zabezpecujuci automatizovane spracovanie prihlasok.
+ * Pre prisposobnie skriptu pre specificke uzitie uprav len tento subor, respektive jeho cast.
+ * Nie je nutne a ani odporucanie nijak zasahovat do samotneho skriptu, ktory je ulozeny v inom subore.
  */
 
 
-/////// GENERAL INFORMATION //////
+/////// VSEOBECNE INFO //////
 
-// FILE ID = string between /d/ and /edit in URL
-// EXAMPLE FILE URL: https://docs.google.com/document/d/1wdewdkfeef28nd83s2/edit
-// FILE ID = 1wdewdkfeef28nd83s2
+// Do poli ohranicenych pomocu znaciek "ZACIATOK UPRAV" a "KONIEC UPRAV" vloz specificke info pre tvoje subory a zbor.
+// Udaje do poli vkladaj medzi znacky ''.
+// Pre funkcionalitu s prilozenymi sablona nie je potrebne editovat ziadne dalsie polia ani nic ine
 
-// FOLDER ID = string after last / in URL
+
+// Ako ziskat nizsie pozadovane IDcka a co su vlastne zac
+
+// ID SUBORU = retazec medzi /d/ a /edit v URL suboru
+// PRIKLAD URL SUBORU: https://docs.google.com/document/d/1wdewdkfeef28nd83s2/edit
+// ID SUBORU = 1wdewdkfeef28nd83s2
+
+// ID PRIECINKA = retazec po poslednom / v URL priecinka
 // EXAMPLE FOLDER URL https://drive.google.com/drive/u/1/folders/37dh8nxnxnd8ghag8ax
-// FOLDER ID = 37dh8nxnxnd8ghag8ax
+// ID PRIECINKA = 37dh8nxnxnd8ghag8ax
 
-// Insert specific info for your files and data below, into the fields between the "BEGIN EDITS" and "END EDITS" marks.
-// Insert them between the '' marks.
-// There is no need to edit anything else for as is functionality.
 
 // ----------------------------------------------------------------------------------------- //
 
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-// BEGIN EDITS ////////////////////////////////////////////////////////////////////////////////
+// ZACIATOK UPRAV /////////////////////////////////////////////////////////////////////////////
 
-// Application specific fields: ///////////////////////////////////////////////////////////////
+// Polia pre sablonu prihlasky: ///////////////////////////////////////////////////////////////
 
-// id of application template document
-const APPLICATION_TEMPLATE_FILE_ID = '';
+// Id suboru sablony prihlasky
+const PRIHLASKA_SABLONA_ID_SUBORU = '';
 
-// id of email body template document
-const EMAIL_TEMPLATE_FILE_ID = '';
+// Id suboru sablony sprievodneho mailu
+const EMAIL_SABLONA_ID_SUBORU = '';
 
-// id of folder where final PDFs of applications will be stored
-const DESTINATION_FOLDER_ID = '';
+// Id priecinka kam sa budu ukladat vygenerovane PDFka prihlasok
+const PRIECINOK_S_PDF_ID_PRIECINKA = '';
 
-// The name of your scout group as will be displayed in the the final application
-const SCOUT_GROUP_NAME = '';
+// Nazov tvojho zboru
+const NAZOV_ZBORU = '';
 
-// The number of your scout group's banking account unto which you accept payments. Use IBAN format
-const IBAN = '';
-
-// The width of the pay by square qr code. For provided template leave as is
-const PBS_QR_WIDTH = 128;
+// IBAN uctu tvojho zboru na ktory prijmate poplatky za tabor. Validny je IBAN s medzerami aj bez
+const IBAN_ZBORU = '';
 
 
-// Email specific fields: ////////////////////////////////////////////////////////////////////////
+// Polia pre sablonu sprievodneho emailu: ///////////////////////////////////////////////////////
 
-// The name of the closest municipality to the campsite
-const CAMP_MUNICIPALITY = '';
+// Nazov najblizsej obce pri taborisku
+const TABOR_OBEC = '';
 
-// The GPS coordinates of the campsite
-const CAMP_COORDINATES = '';
+// GPS suradnice luky taboriska
+const TABOR_SURADNICE = '';
 
-// The link to your website with information about the camp
-const CAMP_WEBSITE = '';
+// Link na web stranku s informaciami o vasom tabore
+const TABOR_WEB = '';
 
-// Personal information about the camp leader
-const CAMP_LEADER_NAME = '';
-const CAMP_LEADER_EMAIL = '';
-const CAMP_LEADER_PHONE = '';
+// Osobne udaje vodcu tabora
+const VODCA_TABORA_MENO = '';
+const VODCA_TABORA_EMAIL = '';
+const VODCA_TABORA_TELEFON = '';
 
-// END EDITS //////////////////////////////////////////////////////////////////////////////////
+// KONIEC UPRAV ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
 // ----------------------------------------------------------------------------------------- //
-//////////////////// DO NOT EDIT ANYTHING UNDER THIS LINE UNLESS NECESSARY ////////////////////
-/////////////////// E.G. ONLY IN CASE OF CHANGING TAG NAMES IN THE TEMPLATES //////////////////
+// NEEDITUJ NIC CO JE ODTIALTO NIZSIE POKIAL TO NIE JE VYSLOVENE NEVYHNUTNE!!!
+// NEVYHNUTNOST ZMIEN JE  NAPR. V PRIPADE ZMENY TAGOV V SABLONACH KTORE SA NENACHADZAJU
+// V PRIHLASOVACOM FORMULARI AKO OTAZKY ALEBO V PRIPADE ZMENY ZNENIA DOLEZITYCH OTAZOK
+// V SAMOTNOM PRIHLASOVACOM FORMULARI (VID NIZSIE)
 // ----------------------------------------------------------------------------------------- //
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-// Tags used in the templates that are not questions in the application form
-// and therefore we have to create them manually
+// Tagy pouzite v sablonach ktore nefiguruju v prihlasovacom formulari ako otazky
 
-// Application template tags:
-const YEAR_TAG = "{{Rok}}";
-const PAY_BY_SQUARE_TAG = "{{payBySquare}}";
-const PARTICIPANT_BIRTH_YEAR_TAG = "{{Rok narodenia účastníka}}";
-const SCOUT_GROUP_NAME_TAG = "{{Názov zboru}}";
-const IBAN_TAG = "{{IBAN}}";
+// Tagy v sablone prilasky:
+const ROK_TAG = "{{Rok}}";
+const PAY_BY_SQUARE_QR_KOD_TAG = "{{payBySquare}}";
+const ROK_NARODENIA_UCASTNIKA_TAG = "{{Rok narodenia účastníka}}";
+const NAZOV_ZBORU_TAG = "{{Názov zboru}}";
+const IBAN_ZBORU_TAG = "{{IBAN}}";
 
-// Email template tags:
-const CAMP_MUNICIPALITY_TAG = "{{Tábor - obec}}";
-const CAMP_COORDINATES_TAG = "{{Tábor - súradnice}}";
-const CAMP_WEBSITE_TAG = "{{Tábor - web}}";
-const CAMP_LEADER_NAME_TAG = "{{Vodca - meno}}";
-const CAMP_LEADER_EMAIL_TAG = "{{Vodca - email}}";
-const CAMP_LEADER_PHONE_TAG = "{{Vodca - mobil}}";
-
+// Tagy v sablone sprievodneho emailu:
+const TABOR_OBEC_TAG = "{{Tábor - obec}}";
+const TABOR_SURADNICE_TAG = "{{Tábor - súradnice}}";
+const TABOR_WEB_TAG = "{{Tábor - web}}";
+const VODCA_TABORA_MENO_TAG = "{{Vodca - meno}}";
+const VODCA_TABORA_EMAIL_TAG = "{{Vodca - email}}";
+const VODCA_TABORA_TELEFON_TAG = "{{Vodca - mobil}}";
 
 
-// Names of the fields/questions in the application form that are used in the script
-// Data from these fields is directly used in the script, e.g. for file naming, generating payment info or sending email
-// Therefore it is crucial that these fields really do match with tha names in the application form and thus also with
-// the corresponding headers in the table with application responses.
-const PARTICIPANT_BIRTHDAY_FIELD = "Dátum narodenia";
-const PARTICIPANT_FEE_FIELD = "Účastnícky poplatok";
-const PARTICIPANT_NAME_FIELD = "Meno";
-const PARTICIPANT_SURNAME_FIELD = "Priezvisko";
-const EMAIL_FIELD = "E-mail";
+// Nazvy otazok v prihlasovacom formulari ktore su priamo pouzite v skripte
+// Data z tychto otazok (teda odpovede na ne) su priamo pouzitie v skripte, napr. pre generovanie nazvu suboru
+// generovaneho PDFka, generovanie personalizovanych plaobnych udajov vratane QR kodu na platbu ci ziskanie emailovej
+// adresy na ktoru sa nasledne prihlaska odosle.
+// Preto je vynimocne dolezite, aby sa hodnota poli nizsie presne zhodovala ako s nazvom otazok v prihlasovacom
+// formulari tak aj s hlavickami danych stlpcov v tabulke s odpovedami z formulara
+const DATUM_NARODENIA_OTAZKA = "Dátum narodenia";
+const POPLATOK_OTAZKA = "Účastnícky poplatok";
+const MENO_UCASTNIKA_OTAZKA = "Meno";
+const PRIEZVISKO_UCASTNIKA_OTAZKA = "Priezvisko";
+const EMAIL_OTAZKA = "E-mail";
 
 
+// Ine konfiguracne parametre
 
-// Other fields and properties used in the script that are not obtained directly from the response
-// and thus need to be obtained manually
+// Name of the header for the column containing link to the created
+// Nazov hlavicky stlpca do ktoreho sa budu pridavat linky na vygenerovane PDFka s prihlaskami pre konkretnych ucastnikov
+const PDF_URL_NAZOV_STLPCA = 'PDF link';
 
-// Current year
-const CURRENT_YEAR = new Date().getFullYear();
-
-// Special characters that can mess up tag replacement so they need to be escaped
-const SPECIAL_CHARACTERS_TO_ESCAPE = './+()*$^?[]|';
-
-const PDF_URL_HEADER = 'PDF link';
+// Sirka vygenerovaneho Pay By Square QR kodu pre rychlu platbu. Pre prilozenu sablonu je velkost nastavena akurat
+const PAY_BY_SQUARE_SIRKA_QR_KODU = 128;

@@ -17,6 +17,80 @@
  */
 
 
+// Application specific fields: ///////////////////////////////////////////////////////////////
+
+// id of application template document
+var APPLICATION_TEMPLATE_FILE_ID;
+
+// id of email body template document
+var EMAIL_TEMPLATE_FILE_ID;
+
+// id of folder where final PDFs of applications will be stored
+var DESTINATION_FOLDER_ID;
+
+// The name of your scout group as will be displayed in the the final application
+var SCOUT_GROUP_NAME;
+
+// The number of your scout group's banking account unto which you accept payments. Use IBAN format
+var IBAN;
+
+
+// Email specific fields: ////////////////////////////////////////////////////////////////////////
+
+// The name of the closest municipality to the campsite
+var CAMP_MUNICIPALITY;
+
+// The GPS coordinates of the campsite
+var CAMP_COORDINATES;
+
+// The link to your website with information about the camp
+var CAMP_WEBSITE;
+
+// Personal information about the camp leader
+var CAMP_LEADER_NAME;
+var CAMP_LEADER_EMAIL;
+var CAMP_LEADER_PHONE;
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+// Tags used in the templates that are not questions in the application form
+// and therefore we have to create them manually
+
+// Application template tags:
+var YEAR_TAG;
+var PAY_BY_SQUARE_TAG;
+var PARTICIPANT_BIRTH_YEAR_TAG;
+var SCOUT_GROUP_NAME_TAG;
+var IBAN_TAG;
+
+// Email template tags:
+var CAMP_MUNICIPALITY_TAG;
+var CAMP_COORDINATES_TAG;
+var CAMP_WEBSITE_TAG;
+var CAMP_LEADER_NAME_TAG;
+var CAMP_LEADER_EMAIL_TAG;
+var CAMP_LEADER_PHONE_TAG;
+
+// Names of the fields/questions in the application form
+var PARTICIPANT_BIRTHDAY_FIELD;
+var PARTICIPANT_FEE_FIELD;
+var PARTICIPANT_NAME_FIELD;
+var PARTICIPANT_SURNAME_FIELD;
+var EMAIL_FIELD;
+
+// Other configurable fields
+// The width of the pay by square qr code. For provided template leave as is
+var PBS_QR_WIDTH;
+
+// Name of the header for the column containing link to the created PDF
+var PDF_URL_HEADER;
+
+
+// Current year
+const CURRENT_YEAR = new Date().getFullYear();
+
+// Special characters that can mess up tag replacement so they need to be escaped
+const SPECIAL_CHARACTERS_TO_ESCAPE = './+()*$^?[]|';
+
 /**
  * Creates header-value pairs from separate arrays of headers and values
  * @param values - array of values inputted by the applicant into the Google Form
@@ -228,6 +302,7 @@ function convToGoogleDoc(file){
  * THIS FUNCTION MUST BE SELECTED IN THE TRIGGER
  */
 function createAndSendPdfFromForm() {
+    mapParamsFromConfigInLocale();
 
     // Get the active sheet of the response data table (the sheet that is linked to the form and collects responses)
     var sheet = SpreadsheetApp.getActiveSheet();
@@ -374,4 +449,43 @@ function addPdfLinkToSheet(sheet, lastRowIndex, headers, pdf){
 
     // Insert the link to the PDF into last column of the last row (where current response data is stored)
     sheet.getRange(lastRowIndex+1, lastColumnIndex +1).setValue(pdf.getUrl());
+}
+
+function mapParamsFromConfigInLocale() {
+    // Template fields
+    APPLICATION_TEMPLATE_FILE_ID = PRIHLASKA_SABLONA_ID_SUBORU;
+    EMAIL_TEMPLATE_FILE_ID = EMAIL_SABLONA_ID_SUBORU;
+    DESTINATION_FOLDER_ID = PRIECINOK_S_PDF_ID_PRIECINKA;
+    SCOUT_GROUP_NAME = NAZOV_ZBORU;
+    IBAN = IBAN_ZBORU;
+    CAMP_MUNICIPALITY = TABOR_OBEC;
+    CAMP_COORDINATES = TABOR_SURADNICE;
+    CAMP_WEBSITE = TABOR_WEB;
+    CAMP_LEADER_NAME = VODCA_TABORA_MENO;
+    CAMP_LEADER_EMAIL = VODCA_TABORA_EMAIL;
+    CAMP_LEADER_PHONE = VODCA_TABORA_TELEFON;
+
+    // Tags
+    YEAR_TAG = ROK_TAG;
+    PAY_BY_SQUARE_TAG = PAY_BY_SQUARE_QR_KOD_TAG;
+    PARTICIPANT_BIRTH_YEAR_TAG = ROK_NARODENIA_UCASTNIKA_TAG;
+    SCOUT_GROUP_NAME_TAG = NAZOV_ZBORU_TAG;
+    IBAN_TAG = IBAN_ZBORU_TAG;
+    CAMP_MUNICIPALITY_TAG = TABOR_OBEC_TAG;
+    CAMP_COORDINATES_TAG = TABOR_SURADNICE_TAG;
+    CAMP_WEBSITE_TAG = TABOR_WEB_TAG;
+    CAMP_LEADER_NAME_TAG = VODCA_TABORA_MENO_TAG;
+    CAMP_LEADER_EMAIL_TAG = VODCA_TABORA_EMAIL_TAG;
+    CAMP_LEADER_PHONE_TAG = VODCA_TABORA_TELEFON_TAG;
+
+    // Application form questions/fields
+    PARTICIPANT_BIRTHDAY_FIELD = DATUM_NARODENIA_OTAZKA;
+    PARTICIPANT_FEE_FIELD = POPLATOK_OTAZKA;
+    PARTICIPANT_NAME_FIELD = MENO_UCASTNIKA_OTAZKA;
+    PARTICIPANT_SURNAME_FIELD = PRIEZVISKO_UCASTNIKA_OTAZKA;
+    EMAIL_FIELD = EMAIL_OTAZKA;
+
+    // Other fields
+    PBS_QR_WIDTH = PAY_BY_SQUARE_SIRKA_QR_KODU;
+    PDF_URL_HEADER = PDF_URL_NAZOV_STLPCA;
 }
