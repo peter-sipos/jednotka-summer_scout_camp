@@ -1,32 +1,140 @@
+## VŠEOBECNÉ INFO A POSTUP
+
+- v Google Drive vytvor prihlasovací formulár cez Google Forms. Kludne sprav kópiu podla priloženého vzoru v súbore "Application form - example.pdf" nachádzajúceho sa v priečinku "resources"
+  - akurát nezabudni upraviť názvy otázok a texty podľa tvojich potrieb
+  - napr. dátumy tábora, deadline na vyplnenie prihlášky, poplatky, link na táborovú stránku...
+  - **POZOR: NEMEŇ nasledovné otázky: "Dátum narodenia", "Účastnícky poplatok", "Meno", "Priezvisko", "E-mail"**
+    - texty odpovedí z týchto otázok sú totiž priamo použité aj v samotnom skripte (napr. pre prispôsobenie názvu PDFka či platobných údajov)
+    - v prípade zmeny názvu týchto otázok je potrebné upraviť ich znenie v konfiguračnom súbore
+- v prihlasovacom Google Forms formulári na záložke "Odpovede" vygeneruj tabuľku s odpoveďami formulára
+  - **POZOR: po vygenerovaní tabuľky už následne nemeň ani otázky v prihlasovacom formulári ani hlavičky (názvy) jednotlivých stĺpcov v tabuľke!**
+- priprav šablónu sprievodného mailu
+  - ide o text samotného mailu v ktorom sa posiela vygenerovaná PDF prihláška
+  - stačí použiť priložený dokument "Email template.docx" nachádzajúci sa v priečinku "resources"
+    - pre plnohodnotnú funkčnosť nie sú v súbore potrebné žiadne zmeny
+  - daný súbor je samozrejme možné editovať (ide o obyčajný Word dokument), napr. kvôli úprave textov
+    - **POZOR: v prípade, že sa rozhodneš daný dokument editovať alebo použiť úplne vlastný text je potrebné brať v úvahu nasledovné veci:**
+      - obsah dokumentu musí byť naformátovaný ako HTML aby sa zaručilo správne naformátovanie textu v samotnom emaili
+      - inak povedané, v úvahu sa berie iba formátovanie textu spravené pomocou HTML tagov 
+        - napr. text ktorý je síce vo Worde zvýraznený tučným, no nachádza sa mimo <b> ... </b> tagov sa nebude zobrazovať tučným vo výslednom maili
+        - pre referenciu HTML tagov odporúčam pozrieť: https://www.javatpoint.com/html-tags prípadne https://www.w3schools.com/tags/ref_byfunc.asp
+    - výsledný súbor môže byť buď klasický Word dokument s príponou .docx alebo Google Doc dokument uložený online
+      - v prípade Word dokumentu ho je potrebné na záver nahrať na Google Drive - odporúčam priamo do priečinka kde je uložený aj prihlasovací formulár
+- priprav šablónu prihlášky
+  - ide o dokument prihlášky, z ktorého sa vygeneruje personalizované PDFko pre daného účastníka
+  - stačí použiť priložený dokument "Application template.docx" nachádzajúci sa v priečinku "resources"
+    - pre plnohodnotnú funkčnosť nie sú v súbore potrebné žiadne zmeny
+  - podobne ako email, aj šablónu prihlášky je možné editovať a prispôsobiť si ju na svoje potreby
+    - narozdiel od emailu, tu už **nie je potrebné** používať na formátovanie HTML tagy - jedná sa naozaj o obyčajný Wordovský dokument
+    - **POZOR: v prípade, že sa rozhodneš daný dokument editovať alebo použiť úplne vlastný text je potrebné brať v úvahu nasledovné veci:**
+      - na miestach, kde sa majú do šablóny doplniť údaje ktoré účastník vyplnil vo formulári je potrebné vložiť "{{TAG}}"
+        - **POZOR: text "TAG"u v {{}} zátvorkách musí byť rovnaká ako názov danej otázky v prihlasovacom formulári!**
+          - napr. ak sa otázka vo formulári volá "Dátum narodenia", tak v šablóne, kam sa má tento dátum narodenia doplniť musí byť tag vo forme "{{Dátum narodenia}}"
+          - toto pravidlo, respektíve povinnosť, vychádza z toho, že názvy otázok vo formulári sú zároveň hlavičky jednotlivých stĺpcov v tabuľke s odpoveďami
+      - pri pridávaní tagov do šablóny, ktoré sa viažu na otázku vo formulári, stačí daný tag pridať na požadované miesto v šablóne
+        - vo všeobecnosti sa **neodporúča** vytvárať a pridávať nové tagy, **ktoré by sa neviazali** na žiadnu otázku vo formulári
+          - toto by vyžadovalo zásah do samotného skriptu a pre bežnú funkcionalitu je to nepotrebné
+  - výsledný súbor môže byť buď klasický Word dokument s príponou .docx alebo Google Doc dokument uložený online
+    - v prípade Word dokumentu ho je potrebné na záver nahrať na Google Drive - odporúčam priamo do priečinka kde je uložený aj prihlasovací form
+- na Google Drive vytvor nový priečinok, do ktorého sa budú ukladať vygenrované PDFka prihlášok - pre prehladnosť odporúčam rovno do priečinka kde je uložený prihlasovací formulár
+- v tabuľke s odpoveďami z formulára, v záložke Rozšírenia (respektíve Add-ons, podľa toho či máš Drive v SK alebo AJ) klikni na "Apps Script"
+  - v rozhraní Apps Script by si sa mal ocitnúť priamo v záložke Editora.
+    - ak nie, tak sa do nej presuň kliknutím na ikonku "<>" v ľavom paneli
+  - pridaj hlavný skript
+    - pridaj nový súbor pomocou tlačidla "+", zvoľ možnosť "Skript"
+    - daj mu ľubovoľný názov, napr "Code"
+    - skopíruj doňho celý obsah súboru "Sign Up form - automation script.js" uloženého v priečinku "src"
+      - POZOR - z nejakého dôvodu je možné do Apps Script prostredia vložiť maximálne 100 riadkov naraz. Zatial sa mi žial nepodarilo prísť na to, ako toto obmedzenie obísť.
+      - Ak by sa ti nedal skopírovaný kód vložiť, skús skupírovať a vložiť menej riadkov naraz
+    - **!v tomto súbure následne nič nemeň a neupravuj, pokial to nie je vyslovene nutné a pokial si nie si istý, že vieš, čo robíš!**
+  - pridaj a uprav konfiguračný súbor
+    - pridaj nový súbor pomocou tlačidla "+", zvoľ možnosť "Skript"
+    - daj mu ľubovoľný názov, napr "Config"
+    - skopíruj doňho celý obsah súboru "Config.js" uloženého v priečinku "src"
+      - aj tu platí obmedzenie na kopírovanie / vkladanie max 100 riadkov
+    - **v súbore následne doplň potrebné ID súborov, údaje o zbore, tábore a jeho vedení. Bližšie info nájdeš priamo v danom súbore.**
+  - ulož projekt - kliknutím na ikonku diskety
+  - pridaj spúšťač ktorý spojazdní automatizáciu
+    - v Apps Script rozhraní choď do záložky "Špúšťače", respektíve "Triggers" kliknutím na ikonku stopiek v ľavom paneli
+    - pridaj nový spúšťaš (trigger) pomocou veľkého modrého tlačidla "+ Pridať spúšťač" vpravo dole
+    - v zozbrazenom okne zvoľ nasledovné možnosti:
+      - Vybrať funkciu pre spustenie: "createAndSendPdfFromForm"
+      - Vybrať implementáciu pre spustenie: "Head" - táto hodnota by už mala byť predvolená
+      - Vyberte zdroj události: "Z tabuľky" - táto hodnota by už mala byť predvolená
+      - Vyberte typ udalosti: "Pri odoslaní formulára"
+      - Nastavenie oznámenia o chybe: "Dostávať oznámenie ihneď"
+    - ulož spúšťač kliknutím na modre tlačidlo "Uložiť" nachádzajúce sa v pravo dole
+    - **Dôležité info: email s vygenerovanou PDF prihláškou bude odoslaný z emailu používateľa, ktorý spúšťač vytvoril!** 
+- a to je všetko, gratulujem!
+
+
+FOR ENGLISH SEE BELOW
+
 ## GENERAL INFO AND PROCEDURE
 
-- manage the registrations through Google Forms
-- generate a table with the form responses (done in the Responses tab of the Google Form)
-    - in the sheet, under Add-ons, click on Apps Script
-      - add the script
-          - in the Apps Script interface, go to Editor
-          - add a new file, choose Script
-          - copy and paste there all code from this file
-          - save the project
-      - add the trigger for automation
-          - in the Apps Script interface, go to Triggers
-          - click Add trigger
-          - pick the 'createAndSendPdfFromForm' to be run
-          - pick Head implementation
-          - pick From form as source of event
-          - pick On form submit as event type
-          - pick failure notifications as desired
-          - save the trigger
-          - **note: the email with the PDF will be sent from the email of the user that creates the trigger**
- - prepare a document containing the body of the email
+- create the sign up form in Google Drive via Google Forms. Feel free to copy the one in the "Application form - example.pdf" file located in the "resources" folder
+  - just don't forget to edit the question names and texts to serve your needs
+  - e.g. dates of the camp, deadline for application submission, fees, link to camp web...
+  - **WARNING: DO NOT change the following questions: "Dátum narodenia", "Účastnícky poplatok", "Meno", "Priezvisko", "E-mail"**
+    - the text of the response from these questions is directly used in the script, e.g. for creating customized PDF name or payment info
+    - if you do change them, then you also need to change their names in the config file
+- in the form, generate a table with the form responses, which is done in the Responses tab
+  - **WARNING: don't alter the question in the form after the generation of the table, nor the headers in the table!**
+- prepare the template of the email
+  - this will be the text of the email in which the generated PDF will be sent
+  - it's enough to use the attached document "Email template.docx" located in the "resources" folder
+    - for as-is functionality there are no edits to the file necessary
+  - it's of course possible to edit the given file (it's a regular Word document), e.g. to edit the texts
+    - **WARNING: should you decide to edit the doc or use your own texts, it's vital to keep the following in mind:**
       - **the body of document must be formatted in HTML to ensure proper text formatting in the email**
       - i.e. only the formatting of the text done via HTML tags will be taken into account
-          - e.g. bold text outside of the <b>...</b> won't be bold in the resulting email
-      - the document itself can be stored as a regular .docx file
-      - in the template, manually fill in the field specific to your scout unit and camp. The places to fill in are marked by comments in the doc
- - prepare an application template document that will be sent to the applicants
-      - within the template, use '{{TAG}}' where you want to substitute data from the form response
-          - **the value of the 'TAG' must be the same as the 'NAME' of the question (field) in the Google Form**         
+        - e.g. bold text outside the <b>...</b> tags won't be bold in the resulting email
+        - for reference on HTML tags see: https://www.javatpoint.com/html-tags or https://www.w3schools.com/tags/ref_byfunc.asp
+    - the final file can be either a Word .docx document or a Google Docs document
+      - in case of Word doc it is at last required to upload it to Google Drive - recommended place is folder with the sign up form
+- prepare the application document
+  - this is the document which will be filled in automatically with the data from the form response, exported to PDF and sent via email
+  - it's enough to use the attached document "Application template.docx" located in the "resources" folder
+    - for as-is functionality there are no edits to the file necessary
+  - the application template can also be edited to serve your specific needs
+    - compared to the email template, the file **does not** need to be formatted using HTML
+    - **WARNING: should you decide to edit the doc or use your own texts, it's vital to keep the following in mind:**
+      - at places where data from the form response are to be injected it's necessary to put in a "{{TAG}}"
+        - **WARNING: the text of the "TAG" in the {{}} needs to be identical to the wording of the given question in the sign up form!**
+          - e.g. if the question is called "Birth date", then the place where the given date is to be injected needs to be marked as "{{Birth date}}"
           - this is because the question names are also column headers in the linked table that holds the form responses
-      - in the template, manually fill in the name of your scout unit and its bank account number. The places to fill in are marked by comments in the doc
- - for as is functionality, **EDIT ONLY** the corresponding file IDs in the BEGIN/END EDITS zone
+      - when adding tags into the template that are bound to some question in the form it's enough to add the tag at the desired location in the template
+        - in general, it is **advised against** creating new tags, that **aren't bound** to any question in the form
+          - this would require changes to the script itself and it's completely unnecessary for common use
+  - the final file can be either a Word .docx document or a Google Docs document
+    - in case of Word doc it is at last required to upload it to Google Drive - recommended place is folder with the sign up form
+- in Google Drive, create a new folder (e.g. within the folder containing the application form) that will hold the generated PDFs
+- in the spreadsheet with the form responses, under Add-ons, click on Apps Script
+  - in the Apps Script interface you should land directly in the Editor tab
+    - if not, switch to it by clicking the "<>" icon in the left panel
+  - add the main script
+    - add a new file by hitting the "+" button, choose "Script"
+    - give it an arbitrary name, e.g. "Code"
+    - paste in the whole content of the "Sign Up form - automation script.js" file stored in the "src" folder
+      - ATTENTION: for some reason the Apps Script interface allows pasting in max 100lines at a time. So far I was unable to circumvent the limitation.
+      - in case you couldn't paste in the copied code, try to copy and paste smaller chunks of it
+    - **!afterwards do not edit anything in the file, unless it is really necessary and you are sure you know what you are doing!**
+  - add and edit the configuration file
+    - add a new file using the "+" button, choose "Script"
+    - give it an arbitrary name, like "Config"
+    - copy and paste into it the full contents of the "Config.js" file located in the "src" folder
+      - here the rule for 100 lines at a time also applies
+    - **afterwards fill in the required IDs and other data. See the given file for more info**
+  - save the project by clicking the save icon
+  - add a trigger witch will run the automation
+    - in the Apps Script interface, go to the "Triggers" tab by clicking the "Stopwatch" icon in the left pane
+    - add a new trigger by hitting the big blue button saying "+ Add trigger" in the bottom right
+    - in the pop up window choose as follows:
+      - Pick function to run: "createAndSendPdfFromForm"
+      - Pick implementation to run: "Head" - this should be picked by default
+      - Pick event source: "From table" - this should be picked by default
+      - Pick event type: "Form submit"
+      - Error notification: "Receive notifications immediately"
+    - save the trigger by hitting the blue button "Save" in the bottom right
+    - **Important info: email with the generated PDF application will be sent from the email address of the user, who created and authorized the trigger!**
+- congrats, that's all!
