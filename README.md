@@ -8,27 +8,14 @@
     - v prípade zmeny názvu týchto otázok je potrebné upraviť ich znenie v konfiguračnom súbore
 - v prihlasovacom Google Forms formulári na záložke "Odpovede" vygeneruj tabuľku s odpoveďami formulára
   - **POZOR: po vygenerovaní tabuľky už následne nemeň ani otázky v prihlasovacom formulári ani hlavičky (názvy) jednotlivých stĺpcov v tabuľke!**
-- priprav šablónu sprievodného mailu
-  - ide o text samotného mailu v ktorom sa posiela vygenerovaná PDF prihláška
-  - stačí použiť priložený dokument "Email template.docx" nachádzajúci sa v priečinku "resources"
-    - pre plnohodnotnú funkčnosť nie sú v súbore potrebné žiadne zmeny
-  - daný súbor je samozrejme možné editovať (ide o obyčajný Word dokument), napr. kvôli úprave textov
-    - **POZOR: v prípade, že sa rozhodneš daný dokument editovať alebo použiť úplne vlastný text je potrebné brať v úvahu nasledovné veci:**
-      - obsah dokumentu musí byť naformátovaný ako HTML aby sa zaručilo správne naformátovanie textu v samotnom emaili
-      - inak povedané, v úvahu sa berie iba formátovanie textu spravené pomocou HTML tagov 
-        - napr. text ktorý je síce vo Worde zvýraznený tučným, no nachádza sa mimo <b> ... </b> tagov sa nebude zobrazovať tučným vo výslednom maili
-        - pre referenciu HTML tagov odporúčam pozrieť: https://www.javatpoint.com/html-tags prípadne https://www.w3schools.com/tags/ref_byfunc.asp
-    - výsledný súbor môže byť buď klasický Word dokument s príponou .docx alebo Google Doc dokument uložený online
-      - v prípade Word dokumentu ho je potrebné na záver nahrať na Google Drive - odporúčam priamo do priečinka kde je uložený aj prihlasovací formulár
 - priprav šablónu prihlášky
   - ide o dokument prihlášky, z ktorého sa vygeneruje personalizované PDFko pre daného účastníka
   - stačí použiť priložený dokument "Application template.docx" nachádzajúci sa v priečinku "resources"
     - pre plnohodnotnú funkčnosť nie sú v súbore potrebné žiadne zmeny
-  - podobne ako email, aj šablónu prihlášky je možné editovať a prispôsobiť si ju na svoje potreby
-    - narozdiel od emailu, tu už **nie je potrebné** používať na formátovanie HTML tagy - jedná sa naozaj o obyčajný Wordovský dokument
+  - šablónu prihlášky je možné ďalej editovať a prispôsobiť si ju na svoje potreby - ide o obyčajný Word dokument
     - **POZOR: v prípade, že sa rozhodneš daný dokument editovať alebo použiť úplne vlastný text je potrebné brať v úvahu nasledovné veci:**
       - na miestach, kde sa majú do šablóny doplniť údaje ktoré účastník vyplnil vo formulári je potrebné vložiť "{{TAG}}"
-        - **POZOR: text "TAG"u v {{}} zátvorkách musí byť rovnaká ako názov danej otázky v prihlasovacom formulári!**
+        - **POZOR: text "TAG"u v {{}} zátvorkách musí byť rovnaký ako názov danej otázky v prihlasovacom formulári!**
           - napr. ak sa otázka vo formulári volá "Dátum narodenia", tak v šablóne, kam sa má tento dátum narodenia doplniť musí byť tag vo forme "{{Dátum narodenia}}"
           - toto pravidlo, respektíve povinnosť, vychádza z toho, že názvy otázok vo formulári sú zároveň hlavičky jednotlivých stĺpcov v tabuľke s odpoveďami
       - pri pridávaní tagov do šablóny, ktoré sa viažu na otázku vo formulári, stačí daný tag pridať na požadované miesto v šablóne
@@ -36,8 +23,23 @@
           - toto by vyžadovalo zásah do samotného skriptu a pre bežnú funkcionalitu je to nepotrebné
   - výsledný súbor môže byť buď klasický Word dokument s príponou .docx alebo Google Doc dokument uložený online
     - v prípade Word dokumentu ho je potrebné na záver nahrať na Google Drive - odporúčam priamo do priečinka kde je uložený aj prihlasovací form
-- na Google Drive vytvor nový priečinok, do ktorého sa budú ukladať vygenrované PDFka prihlášok - pre prehladnosť odporúčam rovno do priečinka kde je uložený prihlasovací formulár
+- priprav šablónu sprievodného mailu
+  - ide o text samotného mailu v ktorom sa posiela vygenerovaná PDF prihláška
+  - stačí použiť priložený dokument "Email template.docx" nachádzajúci sa v priečinku "resources"
+    - pre plnohodnotnú funkčnosť nie sú v súbore potrebné žiadne zmeny
+  - šablónu je možné ďalej editovať a prispôsobiť si ju na svoje potreby - ide o obyčajný Word dokument
+    - **POZOR: v prípade, že sa rozhodneš daný dokument editovať alebo použiť úplne vlastný text je potrebné brať v úvahu nasledovné veci:**
+      - obsah dokumentu musí byť naformátovaný ako HTML aby sa zaručilo správne naformátovanie textu v samotnom emaile
+      - inak povedané, v úvahu sa berie iba formátovanie textu spravené pomocou HTML tagov 
+        - napr. text ktorý je síce vo Worde zvýraznený tučným, no nachádza sa mimo <b> ... </b> tagov sa nebude zobrazovať tučným vo výslednom maile
+        - pre referenciu HTML tagov odporúčam pozrieť: https://www.javatpoint.com/html-tags prípadne https://www.w3schools.com/tags/ref_byfunc.asp
+      - podobne ako v šablóne prihlášky, aj tu sú použité {{TAG}}y na automatické doplnenie textu a platia pre ne rovnaké pravidlá ako pri prihláške
+    - výsledný súbor môže byť buď klasický Word dokument s príponou .docx alebo Google Doc dokument uložený online
+      - v prípade Word dokumentu ho je potrebné na záver nahrať na Google Drive - odporúčam priamo do priečinka kde je uložený aj prihlasovací formulár
+- na Google Drive vytvor nový priečinok, do ktorého sa budú ukladať vygenerované PDFka prihlášok - pre prehladnosť odporúčam rovno do priečinka kde je uložený prihlasovací formulár
 - v tabuľke s odpoveďami z formulára, v záložke Rozšírenia (respektíve Add-ons, podľa toho či máš Drive v SK alebo AJ) klikni na "Apps Script"
+  - ak sa ti pri otváraní zobrazí nejaká chyba a nepodarí sa ti otvoriť Apps Script rozhranie, skús sa prihlásiť a otvoriť danú tabuľku v inkognito režime
+    - táto chyba sa môže občas vyskytnúť, ak si v prehliadači prihlásený pod viacerými google účtami
   - v rozhraní Apps Script by si sa mal ocitnúť priamo v záložke Editora.
     - ak nie, tak sa do nej presuň kliknutím na ikonku "<>" v ľavom paneli
   - pridaj hlavný skript
@@ -45,8 +47,8 @@
     - daj mu ľubovoľný názov, napr "Code"
     - skopíruj doňho celý obsah súboru "Sign Up form - automation script.js" uloženého v priečinku "src"
       - POZOR - z nejakého dôvodu je možné do Apps Script prostredia vložiť maximálne 100 riadkov naraz. Zatial sa mi žial nepodarilo prísť na to, ako toto obmedzenie obísť.
-      - Ak by sa ti nedal skopírovaný kód vložiť, skús skupírovať a vložiť menej riadkov naraz
-    - **!v tomto súbure následne nič nemeň a neupravuj, pokial to nie je vyslovene nutné a pokial si nie si istý, že vieš, čo robíš!**
+      - Ak by sa ti nedal skopírovaný kód vložiť, skús skopírovať a vložiť menej riadkov naraz
+    - **!v tomto súbore následne nič nemeň a neupravuj, pokial to nie je vyslovene nutné a pokial si nie si istý, že vieš, čo robíš!**
   - pridaj a uprav konfiguračný súbor
     - pridaj nový súbor pomocou tlačidla "+", zvoľ možnosť "Skript"
     - daj mu ľubovoľný názov, napr "Config"
@@ -55,15 +57,15 @@
     - **v súbore následne doplň potrebné ID súborov, údaje o zbore, tábore a jeho vedení. Bližšie info nájdeš priamo v danom súbore.**
   - ulož projekt - kliknutím na ikonku diskety
   - pridaj spúšťač ktorý spojazdní automatizáciu
-    - v Apps Script rozhraní choď do záložky "Špúšťače", respektíve "Triggers" kliknutím na ikonku stopiek v ľavom paneli
+    - v Apps Script rozhraní choď do záložky "Spúšťače", respektíve "Triggers" kliknutím na ikonku stopiek v ľavom paneli
     - pridaj nový spúšťaš (trigger) pomocou veľkého modrého tlačidla "+ Pridať spúšťač" vpravo dole
-    - v zozbrazenom okne zvoľ nasledovné možnosti:
+    - v zobrazenom okne zvoľ nasledovné možnosti:
       - Vybrať funkciu pre spustenie: "createAndSendPdfFromForm"
       - Vybrať implementáciu pre spustenie: "Head" - táto hodnota by už mala byť predvolená
-      - Vyberte zdroj události: "Z tabuľky" - táto hodnota by už mala byť predvolená
+      - Vyberte zdroj udalosti: "Z tabuľky" - táto hodnota by už mala byť predvolená
       - Vyberte typ udalosti: "Pri odoslaní formulára"
       - Nastavenie oznámenia o chybe: "Dostávať oznámenie ihneď"
-    - ulož spúšťač kliknutím na modre tlačidlo "Uložiť" nachádzajúce sa v pravo dole
+    - ulož spúšťač kliknutím na modré tlačidlo "Uložiť" nachádzajúce sa vpravo dole
     - **Dôležité info: email s vygenerovanou PDF prihláškou bude odoslaný z emailu používateľa, ktorý spúšťač vytvoril!** 
 - a to je všetko, gratulujem!
 
@@ -80,24 +82,11 @@ FOR ENGLISH SEE BELOW
     - if you do change them, then you also need to change their names in the config file
 - in the form, generate a table with the form responses, which is done in the Responses tab
   - **WARNING: don't alter the question in the form after the generation of the table, nor the headers in the table!**
-- prepare the template of the email
-  - this will be the text of the email in which the generated PDF will be sent
-  - it's enough to use the attached document "Email template.docx" located in the "resources" folder
-    - for as-is functionality there are no edits to the file necessary
-  - it's of course possible to edit the given file (it's a regular Word document), e.g. to edit the texts
-    - **WARNING: should you decide to edit the doc or use your own texts, it's vital to keep the following in mind:**
-      - **the body of document must be formatted in HTML to ensure proper text formatting in the email**
-      - i.e. only the formatting of the text done via HTML tags will be taken into account
-        - e.g. bold text outside the <b>...</b> tags won't be bold in the resulting email
-        - for reference on HTML tags see: https://www.javatpoint.com/html-tags or https://www.w3schools.com/tags/ref_byfunc.asp
-    - the final file can be either a Word .docx document or a Google Docs document
-      - in case of Word doc it is at last required to upload it to Google Drive - recommended place is folder with the sign up form
 - prepare the application document
   - this is the document which will be filled in automatically with the data from the form response, exported to PDF and sent via email
   - it's enough to use the attached document "Application template.docx" located in the "resources" folder
     - for as-is functionality there are no edits to the file necessary
   - the application template can also be edited to serve your specific needs
-    - compared to the email template, the file **does not** need to be formatted using HTML
     - **WARNING: should you decide to edit the doc or use your own texts, it's vital to keep the following in mind:**
       - at places where data from the form response are to be injected it's necessary to put in a "{{TAG}}"
         - **WARNING: the text of the "TAG" in the {{}} needs to be identical to the wording of the given question in the sign up form!**
@@ -108,8 +97,23 @@ FOR ENGLISH SEE BELOW
           - this would require changes to the script itself and it's completely unnecessary for common use
   - the final file can be either a Word .docx document or a Google Docs document
     - in case of Word doc it is at last required to upload it to Google Drive - recommended place is folder with the sign up form
+- prepare the template of the email
+  - this will be the text of the email in which the generated PDF will be sent
+  - it's enough to use the attached document "Email template.docx" located in the "resources" folder
+    - for as-is functionality there are no edits to the file necessary
+  - the template can also be edited to serve your specific needs
+    - **WARNING: should you decide to edit the doc or use your own texts, it's vital to keep the following in mind:**
+      - **the body of document must be formatted in HTML to ensure proper text formatting in the email**
+      - i.e. only the formatting of the text done via HTML tags will be taken into account
+        - e.g. bold text outside the <b>...</b> tags won't be bold in the resulting email
+        - for reference on HTML tags see: https://www.javatpoint.com/html-tags or https://www.w3schools.com/tags/ref_byfunc.asp
+      - similarly to application template, here the {{TAG}}s are also used for automatic text replacement. Same rules for their use applies as in the application template.
+    - the final file can be either a Word .docx document or a Google Docs document
+      - in case of Word doc it is at last required to upload it to Google Drive - recommended place is folder with the sign up form
 - in Google Drive, create a new folder (e.g. within the folder containing the application form) that will hold the generated PDFs
 - in the spreadsheet with the form responses, under Add-ons, click on Apps Script
+  - if while opening the Apps Script interface you get an error, try to log in and open the table in incognito mode
+    - this error can occasionally happen when you are logged in with multiple Google accounts
   - in the Apps Script interface you should land directly in the Editor tab
     - if not, switch to it by clicking the "<>" icon in the left panel
   - add the main script
